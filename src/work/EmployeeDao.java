@@ -1,15 +1,16 @@
 package work;
 
 import java.sql.Connection;
+import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 
-import oracle.jdbc.datasource.OracleDataSource;
-import oracle.jdbc.replay.OracleDataSourceImpl;
-
 public class EmployeeDao {
+
+	// JDBCドライバの相対パス
+	private static final String DRIVER_NAME = "oracle.jdbc.driver.OracleDriver";
 
 	// データベース接続に必要なデータ(接続文字列と呼ばれる)
 	private static final String JDBC_URL = "jdbc:oracle:thin:@localhost:1521:ORCL";
@@ -29,9 +30,6 @@ public class EmployeeDao {
 
 		ArrayList<EmployeeDto> list = new ArrayList<>();
 
-		// データベースへの接続管理を行うクラス
-		OracleDataSource ds = null;
-
 		// データベースとの接続状態を保持するクラス
 		Connection con = null;
 
@@ -41,16 +39,17 @@ public class EmployeeDao {
 		// SELECT文の取得結果を受け取るクラス
 		ResultSet rs = null;
 
+		// JDBCドライバのロード
+		try {
+			Class.forName(DRIVER_NAME);
+		} catch (ClassNotFoundException e) {
+			e.printStackTrace();
+		}
+
 		// データベース接続処理は検査例外を伴うので例外処理を必ず実装する
 		try {
-			// データソースをインスタンス化
-			ds = new OracleDataSourceImpl();
-
-			// 接続文字列をデータソースにセットする
-			ds.setURL(JDBC_URL);
-
 			// ユーザIDとパスワードをセットして接続実施
-			con = ds.getConnection(USER_ID, USER_PASS);
+			con = DriverManager.getConnection(JDBC_URL, USER_ID, USER_PASS);
 
 			// SQL文をStringBuilderクラスを使って用意する
 			StringBuilder builder = new StringBuilder();
